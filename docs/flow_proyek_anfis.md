@@ -17,7 +17,7 @@ graph TD
     C --> C1[GLCM Tekstur: X1-X5]
     C --> C2[Indeks Vegetasi ExG: X6]
     C --> C3[Labeling dari Masker: Y]
-    C1 & C2 & C3 --> D[Dataset Tabular: dataset_fitur_sampah.csv]
+    C1 & C2 & C3 --> D[Dataset Tabular: data/processed/dataset_fitur_sampah.csv]
     D --> E[Normalisasi Min-Max & Stratified Split]
     E --> F[Inisialisasi ANFIS via K-Means]
     F --> G[Pelatihan Model ANFIS]
@@ -30,7 +30,7 @@ graph TD
 ## 2. Rincian Alur Pemrosesan Data (Preprocessing)
 
 ### A. Konversi Anotasi ke Masker Biner (Ground Truth Mask)
-*   **Input**: Berkas anotasi COCO JSON (`dronewaste_pruned.json`).
+*   **Input**: Berkas anotasi COCO JSON (`data/raw/annotations/dronewaste_v2.0.json`).
 *   **Proses**: Membaca koordinat segmen poligon sampah dari metadata gambar, lalu melukis poligon tersebut ke dalam matriks kosong berukuran sama dengan gambar asli. Area sampah diberi nilai piksel `255` (putih) dan latar belakang diberi nilai `0` (hitam).
 *   **Output**: Masker biner segmentasi yang bersih untuk setiap citra.
 
@@ -59,8 +59,8 @@ Persentase luas wilayah sampah dihitung dari perbandingan piksel putih (`255`) t
 
 ### E. Pengurangan Citra Tanpa Anotasi (Image Dataset Reduction)
 *   **Masalah Ketidakseimbangan**: Karena sebagian besar wilayah pada citra UAV berisi lahan bersih (background), ekstraksi grid menghasilkan jumlah data **Kelas 0 (Aman/Bersih)** yang sangat dominan.
-*   **Solusi**: Jumlah gambar tanpa anotasi (bersih) di folder dataset dikurangi dari 199 citra menjadi **50 citra** secara fisik untuk meminimalkan data latar belakang bersih. Sesuai preferensi pengguna, logika penyeimbangan (downsampling) grid di dalam kode dihilangkan seluruhnya agar ekstraksi data berjalan apa adanya secara natural dari citra yang tersisa.
-*   **Hasil Akhir**: Dataset akhir memiliki total **4.884 baris** yang tidak sepenuhnya seimbang (Kelas 0: 2.599 baris [53.21%]; Kelas 1: 1.120 baris [22.93%]; Kelas 2: 1.165 baris [23.85%]), disimpan ke dalam berkas `dataset_fitur_sampah.csv`.
+*   **Solusi**: Citra tanpa anotasi dihapus dari folder dataset dan entri `images` kosong pada COCO JSON dipangkas agar proses ekstraksi tidak memproses citra latar belakang murni yang memberatkan komputasi.
+*   **Hasil Akhir**: Dataset akhir memiliki total **4.684 baris** yang tidak sepenuhnya seimbang (Kelas 0: 2.399 baris [51.22%]; Kelas 1: 1.120 baris [23.91%]; Kelas 2: 1.165 baris [24.87%]), disimpan ke dalam berkas `data/processed/dataset_fitur_sampah.csv`.
 
 ---
 
@@ -68,7 +68,7 @@ Persentase luas wilayah sampah dihitung dari perbandingan piksel putih (`255`) t
 
 *   **Normalisasi Min-Max**: Karena rentang nilai antar-fitur berbeda sangat jauh, seluruh fitur masukan diskalakan ke rentang $[0, 1]$ agar pelatihan model stabil:
     $$X_{\text{norm}} = \frac{X - X_{\text{min}}}{X_{\text{max}} - X_{\text{min}}}$$
-    Parameter `min` dan `max` dari data latih disimpan ke dalam berkas `scaler_params.pkl` untuk digunakan kembali saat proses inferensi.
+    Parameter `min` dan `max` dari data latih disimpan ke dalam berkas `models/scaler_params.pkl` untuk digunakan kembali saat proses inferensi.
 *   **Pembagian Data Terstratifikasi**: Dataset dibagi menggunakan rasio:
     *   **Data Uji (Testing)**: 20% dari total dataset.
     *   **Data Latih (Training)**: 68% dari total dataset (85% dari bagian latihan).
