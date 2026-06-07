@@ -21,6 +21,7 @@ Project ini berisi pipeline deteksi tingkat kepadatan sampah dari citra UAV meng
 |   |-- model_manual_feature.pth
 |   `-- scaler_params.pkl
 `-- notebooks/
+    |-- experiment_cnn_embedding_anfis.ipynb
     `-- Project_Soft_Computing_v2.ipynb
 ```
 
@@ -33,13 +34,17 @@ Project ini berisi pipeline deteksi tingkat kepadatan sampah dari citra UAV meng
 - `docs/` menyimpan dokumentasi alur kerja, catatan eksperimen, dan ringkasan hasil.
 - `assets/` menyimpan gambar pendukung untuk laporan, presentasi, atau aplikasi.
 
+## Catatan Dependensi
+
+Notebook `experiment_cnn_embedding_anfis.ipynb` membutuhkan `torchvision` untuk memuat CNN pretrained. Default eksperimen optimized memakai EfficientNet-B0 embedding dan ANFIS sebagai classifier akhir.
+
 Untuk eksperimen baru, gunakan nama yang eksplisit, misalnya:
 
 ```text
 notebooks/experiment_manual_features.ipynb
 notebooks/experiment_cnn_embedding_anfis.ipynb
 models/anfis_manual_features.pth
-models/anfis_resnet18_pca.pth
+models/model_efficientnet_b0_original-hflip-vflip_grid256_anfis.pth
 data/processed/features_manual_v2.csv
-data/processed/features_resnet18_pca.csv
+data/processed/features_efficientnet_b0_original-hflip-vflip_grid256_best_pca_anfis.csv
 ```
