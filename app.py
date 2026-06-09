@@ -1,8 +1,11 @@
 import streamlit as st
 import numpy as np
 from PIL import Image
-from utils.cnn_inference import load_cnn_anfis_assets, predict_cnn_anfis
-from utils.cnn_inference import predict_cnn_anfis
+from utils.cnn_inference import (
+    load_cnn_anfis_assets,
+    load_coco_mask_cnn_anfis_assets,
+    predict_cnn_anfis,
+)
 
 from utils.manual_anfis_inference import (
     load_manual_anfis_model,
@@ -24,6 +27,10 @@ CNN_PATH = "models/finetuned_efficientnet_b0_grid256_classifier.pth"
 CNN_ANFIS_PATH = "models/model_efficientnet_b0_finetuned_original-hflip-vflip_grid256_anfis.pth"
 CNN_PCA_PATH = "models/pca_efficientnet_b0_finetuned_original-hflip-vflip_grid256_best.pkl"
 CNN_SCALER_PATH = "models/scaler_efficientnet_b0_finetuned_original-hflip-vflip_grid256_best.pkl"
+COCO_CNN_ANFIS_PATH = "models/coco_mask_cnn_anfis/anfis_coco_mask_cnn_minimal.pth"
+COCO_CNN_PCA_PATH = "models/coco_mask_cnn_anfis/pca_coco_mask_cnn_minimal.pkl"
+COCO_CNN_SCALER_PATH = "models/coco_mask_cnn_anfis/scaler_coco_mask_cnn_minimal.pkl"
+COCO_CNN_CONFIG_PATH = "models/coco_mask_cnn_anfis/config_coco_mask_cnn_anfis.json"
 
 
 @st.cache_resource
@@ -37,6 +44,15 @@ def cached_load_cnn_anfis():
         CNN_ANFIS_PATH,
         CNN_PCA_PATH,
         CNN_SCALER_PATH
+    )
+
+@st.cache_resource
+def cached_load_coco_mask_cnn_anfis():
+    return load_coco_mask_cnn_anfis_assets(
+        COCO_CNN_ANFIS_PATH,
+        COCO_CNN_PCA_PATH,
+        COCO_CNN_SCALER_PATH,
+        COCO_CNN_CONFIG_PATH
     )
 
 st.sidebar.header("Pengaturan")
@@ -62,7 +78,8 @@ model_choice = st.sidebar.selectbox(
     "Pilih Model",
     options=[
         "Manual Feature Engineering + ANFIS",
-        "CNN + ANFIS"
+        "CNN + ANFIS",
+        "CNN COCO Mask + ANFIS Grid 128"
     ]
 )
 
@@ -117,6 +134,44 @@ else:
 
                 c1, c2, c3 = st.columns(3)
 
+                c1.metric("Aman", f"{class_percent.get('Aman', 0)}%")
+                c2.metric("Tersebar", f"{class_percent.get('Tersebar', 0)}%")
+                c3.metric("Kritis", f"{class_percent.get('Kritis', 0)}%")
+
+                st.subheader("Tabel Hasil Grid")
+                st.dataframe(df_result, use_container_width=True)
+
+            elif model_choice == "CNN COCO Mask + ANFIS Grid 128":
+                feature_extractor, preprocess, cnn_anfis_model, pca, cnn_scaler, config = cached_load_coco_mask_cnn_anfis()
+
+                st.info("Model CNN COCO Mask + ANFIS menggunakan semua grid 128x128 tanpa input COCO.")
+
+                heatmap, overlay, df_result, class_percent = predict_cnn_anfis(
+                    img_rgb=img_rgb,
+                    feature_extractor=feature_extractor,
+                    preprocess=preprocess,
+                    anfis_model=cnn_anfis_model,
+                    pca=pca,
+                    scaler=cnn_scaler,
+                    grid_size=config["grid_size"],
+                    use_augmentation=False
+                )
+
+                st.success("Prediksi CNN COCO Mask + ANFIS Grid 128 selesai.")
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.subheader("Heatmap Prediksi")
+                    st.image(heatmap, use_container_width=True)
+
+                with col2:
+                    st.subheader("Overlay Hasil")
+                    st.image(overlay, use_container_width=True)
+
+                st.subheader("Persentase Kelas")
+
+                c1, c2, c3 = st.columns(3)
                 c1.metric("Aman", f"{class_percent.get('Aman', 0)}%")
                 c2.metric("Tersebar", f"{class_percent.get('Tersebar', 0)}%")
                 c3.metric("Kritis", f"{class_percent.get('Kritis', 0)}%")
