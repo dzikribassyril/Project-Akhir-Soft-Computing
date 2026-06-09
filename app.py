@@ -78,8 +78,8 @@ model_choice = st.sidebar.selectbox(
     "Pilih Model",
     options=[
         "Manual Feature Engineering + ANFIS",
-        "CNN + ANFIS",
-        "CNN COCO Mask + ANFIS Grid 128"
+        "CNN + ANFIS Grid 256",
+        "CNN + ANFIS Grid 128"
     ]
 )
 
@@ -141,10 +141,8 @@ else:
                 st.subheader("Tabel Hasil Grid")
                 st.dataframe(df_result, use_container_width=True)
 
-            elif model_choice == "CNN COCO Mask + ANFIS Grid 128":
+            elif model_choice == "CNN + ANFIS Grid 128":
                 feature_extractor, preprocess, cnn_anfis_model, pca, cnn_scaler, config = cached_load_coco_mask_cnn_anfis()
-
-                st.info("Model CNN COCO Mask + ANFIS menggunakan semua grid 128x128 tanpa input COCO.")
 
                 heatmap, overlay, df_result, class_percent = predict_cnn_anfis(
                     img_rgb=img_rgb,
@@ -179,10 +177,8 @@ else:
                 st.subheader("Tabel Hasil Grid")
                 st.dataframe(df_result, use_container_width=True)
 
-            elif model_choice == "CNN + ANFIS":
+            elif model_choice == "CNN + ANFIS Grid 256":
                 feature_extractor, preprocess, cnn_anfis_model, pca, cnn_scaler, checkpoint = cached_load_cnn_anfis()
-
-                st.info("Model CNN + ANFIS menggunakan grid 256 sesuai training.")
 
                 heatmap, overlay, df_result, class_percent = predict_cnn_anfis(
                     img_rgb=img_rgb,
