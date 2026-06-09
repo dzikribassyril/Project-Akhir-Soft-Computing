@@ -46,10 +46,16 @@ uploaded_file = st.sidebar.file_uploader(
     type=["jpg", "jpeg", "png"]
 )
 
-grid_size = st.sidebar.selectbox(
-    "Ukuran Grid",
-    options=[64, 128, 256],
-    index=1
+image_scale = st.sidebar.select_slider(
+    "Skala Resolusi Input",
+    options=[1.0, 1.25, 1.5, 2.0],
+    value=1.0
+)
+
+grid_size = st.sidebar.select_slider(
+    "Ukuran Grid Heatmap",
+    options=[32, 64, 128, 256, 384, 512],
+    value=128
 )
 
 model_choice = st.sidebar.selectbox(
@@ -68,6 +74,14 @@ if uploaded_file is None:
 
 else:
     image = Image.open(uploaded_file).convert("RGB")
+
+    if image_scale != 1.0:
+        new_size = (
+            int(image.width * image_scale),
+            int(image.height * image_scale)
+        )
+        image = image.resize(new_size, Image.Resampling.BICUBIC)
+
     img_rgb = np.array(image)
 
     st.subheader("Citra Asli")
