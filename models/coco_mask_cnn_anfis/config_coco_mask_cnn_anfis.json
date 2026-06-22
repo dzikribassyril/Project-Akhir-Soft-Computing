@@ -1,0 +1,11 @@
+{
+  "grid_size": 128,
+  "cnn_model": "efficientnet_b0",
+  "cnn_weights": "EfficientNet_B0_Weights.DEFAULT",
+  "pca_components": 24,
+  "anfis_input_dim": 24,
+  "anfis_rules": 12,
+  "num_classes": 3,
+  "class_names": ["Aman", "Tersebar", "Kritis"],
+  "inference_note": "Aplikasi memprediksi semua grid 128x128 dari gambar input tanpa membutuhkan anotasi COCO."
+}
